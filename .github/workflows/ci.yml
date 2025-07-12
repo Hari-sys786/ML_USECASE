@@ -47,31 +47,53 @@ name: Ticket Forecast CI/CD
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: self-hosted
 
     steps:
-    - name: Checkout
+    - name: 🛎️ Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Setup Python
+    - name: 🐍 Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
-    - name: Install dependencies
+    - name: 📦 Install Dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run Use Case 1
+    - name: ⚙️ Run Use Case 1
       run: python src/run_usecase1.py
 
-    - name: Run Use Case 2
+    - name: ⚙️ Run Use Case 2
       run: python src/run_usecase2.py
 
-    - name: Deploy locally
+    - name: 🚀 Deploy to ~/ticket_deploy
       run: |
-        mkdir -p ~/ticket_deploy
-        cp -r outputs/* ~/ticket_deploy/
+        echo "📁 Deploying to ~/ticket_deploy"
+        DEPLOY_PATH=$HOME/ticket_deploy
+
+        # Create base structure
+        mkdir -p $DEPLOY_PATH/usecase1/models
+        mkdir -p $DEPLOY_PATH/usecase2/models
+        mkdir -p $DEPLOY_PATH/usecase1/outputs
+        mkdir -p $DEPLOY_PATH/usecase2/outputs
+
+        # Copy models
+        cp models/usecase1_model.pkl $DEPLOY_PATH/usecase1/models/
+        cp models/usecase2_model.pkl $DEPLOY_PATH/usecase2/models/
+
+        # Get latest output timestamp folders
+        UC1_OUTPUT=$(ls -td outputs/usecase1/*/ | head -n 1)
+        UC2_OUTPUT=$(ls -td outputs/usecase2/*/ | head -n 1)
+
+        # Copy outputs
+        cp -r "$UC1_OUTPUT" $DEPLOY_PATH/usecase1/outputs/
+        cp -r "$UC2_OUTPUT" $DEPLOY_PATH/usecase2/outputs/
+
+        echo "✅ Deployment successful to $DEPLOY_PATH"

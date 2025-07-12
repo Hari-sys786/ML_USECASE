@@ -1,0 +1,11 @@
+pandas>=1.3
+numpy>=1.21
+scikit-learn>=1.0
+matplotlib>=3.4
+statsmodels>=0.13
+seaborn>=0.11
+
+# Optional but helpful for CI/CD or environment consistency
+# jupyter
+# tqdm
+# python-dotenv
